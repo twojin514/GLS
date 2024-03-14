@@ -24,5 +24,5 @@ struct Benchmark
 	double standard_deviation;
 };
 
-void ReadInputLineFile(std::string FileName, std::vector<Line>& lines);
-//int ReadInputBMFile(std::string FileName, std::vector<BM>& Out_BM);
+void ReadInputLineFile(std::string FileName, std::vector<Line>& lines_data);
+void ReadInputBMFile(std::string FileName, std::vector<Benchmark>& benchmarks_data);
