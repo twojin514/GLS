@@ -73,6 +73,8 @@ void ReadInputBMFile(std::string FileName, std::vector<Benchmark>& benchmarks_da
 
 void PrintLevelingProgram(std::ofstream& outfile, std::vector<Line>& lines_data, std::vector<Benchmark>& benchmarks_data, std::vector<std::vector<int32_t>>& a_matrix, std::vector<std::vector<std::string>>& x_matrix, std::vector<std::vector<double>>& l_matrix, std::vector<std::vector<double>>& w_matrix, std::vector<std::vector<double>>& atwa_matrix, std::vector<std::vector<double>>& atwl_matrix)
 {
+    outfile << std::fixed << std::setprecision(4);
+
     cv::Mat cv_a_matrix, cv_l_matrix, cv_w_matrix, cv_atwa_matrix, cv_atwl_matrix;
 
     VectoMatrix(atwa_matrix, cv_atwa_matrix);
@@ -104,97 +106,134 @@ void PrintLevelingProgram(std::ofstream& outfile, std::vector<Line>& lines_data,
 
     outfile << "\n*************************************** 1.  입력 자료 ***************************************\n";
     outfile << "************************************* Line Input Data **************************************\n";
-    outfile << "\nLine\tID(To)\tID(From)\tElevation_Difference\tStandard Deviation(m)\n";
+    
+    outfile << "\nLine\t\tID(To)\t\tID(From)\t\tElevation_Difference\t\tStandard Deviation(m)\n";
     for (int i = 0; i < lines_data.size(); i++)
     {
-        outfile << lines_data[i].line_number << "\t" << lines_data[i].id_to << "\t" << lines_data[i].id_from << "\t" << lines_data[i].elevation_difference << "\t" << lines_data[i].standard_deviation << "\n";
+        outfile << lines_data[i].line_number << "\t\t" << lines_data[i].id_to << "\t\t" << lines_data[i].id_from << "\t\t" << lines_data[i].elevation_difference << "\t\t" << lines_data[i].standard_deviation << "\n";
     }
 
-    outfile<<"\nNumber\tID\tElevation_Difference\tStandard Deviation(m)\n";
+    outfile << "\n************************************* BM Input Data **************************************\n";
+
+    outfile<<"\nNumber\t\tID\tElevation\tStandard Deviation(m)\n";
     for (int i = 0; i < benchmarks_data.size(); i++)
     {
-        outfile << benchmarks_data[i].benchmark_number << "\t" << benchmarks_data[i].id << "\t" << benchmarks_data[i].elevation << "\t" << benchmarks_data[i].standard_deviation << "\n";
+        outfile << benchmarks_data[i].benchmark_number << "\t\t" << benchmarks_data[i].id << "\t\t" << benchmarks_data[i].elevation << "\t\t" << benchmarks_data[i].standard_deviation << "\n";
     }
+
+    outfile << "\n******************************** Point List with Logical ID *********************************\n";
+    outfile<<"\nNumber\t\tID\n";
+    for (int i = 0; i < x_matrix.size(); i++)
+    {
+        outfile << i+1<<"\t\t" << x_matrix[i][0] << "\n";
+    }
+
 
     outfile << "\n************************************ 2. 수준망 조정 시작 ***********************************\n\n";
     outfile << "측점의 수 : " << x_matrix.size() << "\t\t"<<"관측 수 : "<<lines_data.size()+benchmarks_data.size()<<"\n\n";
-    outfile << "**************************************** Matrix 출력 ***************************************\n\n";
-
-    outfile<<"[ X Matrix ]\n";
-    for (int i = 0; i < x_matrix.size(); i++)
-    {
-		outfile << x_matrix[i][0] << "\n";
-	}
-
-    outfile << "\n[ A Matrix ]\n";
+    
+    outfile << "*****************************************  A Matrix  ****************************************\n\n";
     for (int i = 0; i < a_matrix.size(); i++)
     {
         for (int j = 0; j < a_matrix[i].size(); j++)
         {
-			outfile << a_matrix[i][j] << " ";
+			outfile << a_matrix[i][j] << "\t\t";
 		}
 		outfile << "\n";
 	}
 
-    outfile << "\n[ L Matrix ]\n";
+    outfile << "\n*****************************************  L Matrix  ****************************************\n\n";
     for (int i = 0; i < l_matrix.size(); i++)
     {
 		outfile << l_matrix[i][0] << "\n";
 	}
 
-	outfile << "\n[ W Matrix ]\n";
+    outfile << "\n*****************************************  W Matrix  ****************************************\n\n";
     for (int i = 0; i < w_matrix.size(); i++)
     {
         for (int j = 0; j < w_matrix[i].size(); j++)
         {
-			outfile << w_matrix[i][j] << " ";
+			outfile << w_matrix[i][j] << "\t\t";
 		}
 		outfile << "\n";
 	}
 
-	outfile << "\n[ ATWA Matrix ]\n";
+	outfile << "\n***************************************  ATWA Matrix  *************************************\n\n";
     for (int i = 0; i < atwa_matrix.size(); i++)
     {
         for (int j = 0; j < atwa_matrix[i].size(); j++)
         {
-			outfile << atwa_matrix[i][j] << " ";
+			outfile << atwa_matrix[i][j] << "\t\t";
 		}
 		outfile << "\n";
 	}
 
-	outfile << "\n[ ATWL Matrix ]\n";
+    outfile << "\n***************************************  ATWL Matrix  *************************************\n\n";
     for (int i = 0; i < atwl_matrix.size(); i++)
     {
 		outfile << atwl_matrix[i][0] << "\n";
 	}
 
 
-
-	outfile << "\n\n*************************************** 3. 조정결과 ***************************************\n\n";
-
     cv::Mat cv_inv_atwa_matrix = cv_atwa_matrix.inv();
+    outfile << "\n************************************** Inv ATWA Matrix  ************************************\n\n";
+    for (int i = 0; i < cv_inv_atwa_matrix.rows; i++)
+    {
+        for (int j = 0; j < cv_inv_atwa_matrix.cols; j++)
+        {
+			outfile << cv_inv_atwa_matrix.at<double>(i, j) << "\t\t";
+		}
+		outfile << "\n";
+	}
+
+    outfile << "\n*****************************************  X Matrix  ****************************************\n\n";
+    cv_a_matrix.convertTo(cv_a_matrix, CV_64F);
     cv::Mat calculate_x_matrix = cv_inv_atwa_matrix * cv_atwl_matrix;
 
-    outfile << "[ X Matrix ]\n";
-    for (int i = 0; i < x_matrix.size(); i++)
+    for (int i = 0; i < calculate_x_matrix.rows; i++)
     {
-        for (int j = 0; j < x_matrix[i].size(); j++)
-        {
-            outfile << x_matrix[i][j] << " : " << calculate_x_matrix.at<double>(i, j) << "\n";
-        }
+        outfile << "point" << i + 1 << " : " << calculate_x_matrix.at<double>(i, 0) << "\n";
     }
 
-    outfile<< "\n[ V Matrix ]\n";
-    cv_a_matrix.convertTo(cv_a_matrix, CV_64F);
-    cv::Mat cv_v_matrix = cv_a_matrix* calculate_x_matrix - cv_l_matrix;
+    cv::Mat cv_v_matrix = cv_a_matrix * calculate_x_matrix - cv_l_matrix;
+    outfile << "\n*****************************************  V Matrix  ****************************************\n\n";
+
     for (int i = 0; i < cv_v_matrix.rows; i++)
     {
 		outfile << cv_v_matrix.at<double>(i, 0) << "\n";
 	}
 
+
+	outfile << "\n*************************************** 3. 조정결과 ***************************************\n";
+    outfile << "*****************************************  Point  ****************************************\n\n";
+    outfile << "Number\tID\tElevation\tStandard Deviation(m)\n";
+    for (int i = 0; i < x_matrix.size(); i++)
+    {
+        outfile<<i+1<<"\t"<<x_matrix[i][0]<<"\t"<<calculate_x_matrix.at<double>(i, 0)<<"\t"<<sqrt(cv_inv_atwa_matrix.at<double>(i, i))<<"\n";
+    }
+
+    outfile << "\n*****************************************  Adjusted Elevation Obsevations  ****************************************\n\n";   
+    outfile<<"Line\tID(To)\tID(From)\tElevation_Difference\tStandard Deviation(m)\n";
+
+    for (int i = 0; i < lines_data.size(); i++)
+    {
+        outfile<<lines_data[i].line_number<<"\t"<<lines_data[i].id_to<<"\t"<<lines_data[i].id_from<<"\t"<<calculate_x_matrix.at<double>(i + x_matrix.size(), 0)<<"\t"<<sqrt(cv_inv_atwa_matrix.at<double>(i + x_matrix.size(), i + x_matrix.size()))<<"\n";
+    }
+
+    outfile << "\nNumber\tID\tElevation\tStandard Deviation(m)\n";
+    
+ //   for (int i = 0; i < benchmarks_data.size(); i++)
+ //   {
+	//	outfile << benchmarks_data[i].benchmark_number << "\t" << benchmarks_data[i].id << "\t" << calculate_x_matrix.at<double>(i + lines_data.size(), 0) << "\t" << sqrt(cv_inv_atwa_matrix.at<double>(i + lines_data.size(), i + lines_data.size())) << "\n";
+	//}
+
+
 	outfile << "\n[ 정확도 ]\n";
 	cv::Mat cv_q_matrix = cv_v_matrix.t() * cv_w_matrix * cv_v_matrix;
 	outfile << sqrt(cv_q_matrix.at<double>(0, 0) / (lines_data.size() + benchmarks_data.size() - x_matrix.size())) << "\n";
+
+
+
 }
 
 void SortInputData(std::vector<Line>& lines_data, std::vector<Benchmark>& benchmarks_data, int& point_number, std::vector<std::string>& point_names)
@@ -210,13 +249,10 @@ void SortInputData(std::vector<Line>& lines_data, std::vector<Benchmark>& benchm
 		point_names_temp.push_back(benchmark.id);
 	}
 
-	// Sort point_names_temp
 	std::sort(point_names_temp.begin(), point_names_temp.end());
 
-	// Remove duplicates
 	point_names_temp.erase(std::unique(point_names_temp.begin(), point_names_temp.end()), point_names_temp.end());
 
-	// Update point_number and point_names
 	point_names = point_names_temp;
 	point_number = point_names_temp.size();
 

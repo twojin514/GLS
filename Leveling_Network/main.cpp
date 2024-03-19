@@ -58,34 +58,6 @@ int main(int argc, char* argv[])
 	
 	// 2.2 Matrix 출력
 	PrintLevelingProgram(outfile, lines, benchmarks, a_matrix, x_matrix, l_matrix, w_matrix, atwa_matrix, atwl_matrix);
-	cv::Mat cv_x_matrix, cv_a_matrix, cv_l_matrix, cv_w_matrix, cv_atwa_matrix, cv_atwl_matrix, cv_inv_atwa_matrix;
-
-	cv::Mat mat = cv::Mat(a_matrix.size(), a_matrix[0].size(), CV_32F);
-	for (int i = 0; i < mat.rows; ++i) {
-		for (int j = 0; j < mat.cols; ++j) {
-			mat.at<float>(i, j) = a_matrix[i][j];
-		}
-	}
-
-	cv::Mat mat2=cv::Mat(w_matrix.size(), w_matrix[0].size(), CV_32F);
-	for (int i = 0; i < mat2.rows; ++i) {
-		for (int j = 0; j < mat2.cols; ++j) {
-			mat2.at<float>(i, j) = w_matrix[i][j];
-		}
-	}
-	cv::Mat mat3 = cv::Mat(l_matrix.size(), l_matrix[0].size(), CV_32F);
-	for (int i = 0; i < mat3.rows; ++i) {
-		for (int j = 0; j < mat3.cols; ++j) {
-			mat3.at<float>(i, j) = l_matrix[i][j];
-		}
-	}
-
-	std::cout<<(mat.t()*mat2*mat)<<std::endl;
-	std::cout<<(mat.t()*mat2*mat3)<<std::endl;
-	std::cout<<(mat.t()*mat2*mat).inv()<<std::endl;
-	std::cout<<(mat.t()*mat2*mat).inv()*(mat.t()*mat2*mat3)<<std::endl;
-
-
 
 	outfile.close();
 
