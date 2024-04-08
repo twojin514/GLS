@@ -13,6 +13,9 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <cctype>
+#include <locale>
+#include <iomanip>
 
 struct Line
 {
@@ -33,6 +36,7 @@ struct Benchmark
 
 void ReadInputLineFile(std::string FileName, std::vector<Line>& lines_data);
 void ReadInputBMFile(std::string FileName, std::vector<Benchmark>& benchmarks_data);
+bool CompareStrings(const std::string& a, const std::string& b);
 void SortInputData(std::vector<Line>& lines_data, std::vector<Benchmark>& benchmarks_data, int32_t& point_number, std::vector<std::string>& point_names);
 void PrintLevelingProgram(std::ofstream& outfile, std::vector<Line>& lines_data, std::vector<Benchmark>& benchmarks_data, std::vector<std::vector<std::int32_t>>& a_matrix, std::vector<std::vector<std::string>>& x_matrix, std::vector<std::vector<double>>& l_matrix, std::vector<std::vector<double>>& w_matrix, std::vector<std::vector<double>>& atwa_matrix, std::vector<std::vector<double>>& atwl_matrix);
 
