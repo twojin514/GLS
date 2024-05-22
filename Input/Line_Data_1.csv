@@ -1,7 +1,0 @@
-Line,ID(To),ID(From),Elevation_Difference,Standard Deviation(m)
-1,!인하univ,수준원점,13.46,0.031
-2,INCHEON,!인하univ,-16.48,0.031
-3,1번출구_주안역,수준원점,-11.32,0.025
-4,INCHEON,1번출구_주안역,8.35,0.025
-5, 호 날 두 7,INCHEON,3.01,0.016
-6,INCHEON,수준원점,-3,0.025

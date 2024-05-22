@@ -26,16 +26,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Input\BM_Data_1.csv">
-      <Filter>Input</Filter>
-    </None>
-    <None Include="..\Input\Line_Data_1.csv">
+    <ClInclude Include="function.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Input\Input_Data_1.csv">
       <Filter>Input</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="function.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
+    <Text Include="..\Workorder\workorder.txt">
+      <Filter>Input</Filter>
+    </Text>
   </ItemGroup>
 </Project>

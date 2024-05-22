@@ -24,6 +24,7 @@
     <ProjectGuid>{a4ca091b-9eba-444b-bcb7-649f4674cb67}</ProjectGuid>
     <RootNamespace>LevelingNetwork</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>GLS</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -135,11 +136,13 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Input\BM_Data_1.csv" />
-    <None Include="..\Input\Line_Data_1.csv" />
+    <ClInclude Include="function.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="function.h" />
+    <None Include="..\Input\Input_Data_1.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Workorder\workorder.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
