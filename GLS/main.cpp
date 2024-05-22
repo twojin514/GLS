@@ -93,21 +93,21 @@ int main(int argc, char* argv[])
 	int iteration;
 	for (iteration = 0; iteration < 100; ++iteration) {
 
-		// 2.1.1 Matrix 설정
+		// Matrix 설정
 		SetWMatrix(initial_coefficients, control_points, w_matrix, we_matrix, b_matrix, q_matrix); // 동등무게 설정
 		SetJMatirx(control_points, j_matrix); // 미지수 증분의 계수행렬 설정
 		SetKMatrix(initial_coefficients, control_points, k_matrix); // 관측방정식 F에 초기값을 대입하였을 때의 F 값
 		SetXMatrix(x_matrix, k_matrix, j_matrix, we_matrix, b_matrix); // 미지수 증분 행렬
 		SetVMatrix(ve_matrix, v_matrix, control_points, w_matrix , we_matrix, b_matrix, k_matrix, j_matrix, x_matrix, q_matrix); // 잔차행렬
 
-		// 2.1.2 분산 계산
+		// 분산 계산
 		CalculateSoSquare(So_square, control_points, ve_matrix, we_matrix); 		So_list.at<double>(iteration, 0) = sqrt(So_square.at<double>(0, 0)); // 단위무게 표준편차 
 		CalculateSigmaXX(sigma_xx, So_square, j_matrix, we_matrix); // 최학값의 분산-공분산 행렬
 		CalculateSigmaLL(sigma_ll, sigma_xx, control_points, j_matrix); // 조정된 관측값의 분산-공분산 행렬
 		PrintIteration(outfile, iteration, control_points, initial_coefficients, x_matrix, v_matrix, So_square);
 
-		// 2.2 반복 중단 조건
-		// ② 가장 큰 조정값이 어느 정도 미만으로 작아지면 종료
+		// 반복 중단 조건
+		// 가장 큰 조정값이 어느 정도 미만으로 작아지면 종료 (정상종료)
 		double max_diff = 0.0;
 		for (int i = 0; i < 4; ++i) {
 			double diff = abs(x_matrix.at<double>(i, 0));
@@ -120,27 +120,36 @@ int main(int argc, char* argv[])
 			outfile << "조정 종료 : ② 가장 큰 조정값이 어느 정도 미만으로 작아지면 종료 (정상종료)\n";
 			std::cout << "\n************************************* 3. 조정 종료 ****************************************\n";
 			std::cout << "조정 종료 : ② 가장 큰 조정값이 어느 정도 미만으로 작아지면 종료 (정상종료)\n";
+			UpdateCoefficients(initial_coefficients, x_matrix, control_points, v_matrix);
+
 			break;
 		}
 
+		// 단위무게 RMSE(So) 변화율 점검 (정상종료)
 		else if (iteration > 1 && ((sqrt(So_square.at<double>(0, 0)) - So_list.at<double>(iteration - 1, 0)) / So_list.at<double>(iteration - 1, 0)) <= 0.000001)
 		{
 			outfile << "\n************************************* 3. 조정 종료 **************************************\n";
 			outfile << "조정 종료 : ③ 단위무게 RMSE(So) 변화율 점검 (정상종료)\n";
 			std::cout << "\n************************************* 3. 조정 종료 ****************************************\n";
 			std::cout << "조정 종료 : ③ 단위무게 RMSE(So) 변화율 점검 (정상종료)\n";
+			UpdateCoefficients(initial_coefficients, x_matrix, control_points, v_matrix);
+
 			break;
 		}
 
+		// 최대반복계산수 (비정상종료)
 		else if (iteration == 100)
 		{
 			outfile << "\n************************************* 3. 조정 종료 **************************************\n";
 			outfile << "조정 종료 : ①	최대반복계산수 (비정상종료)\n";
 			std::cout << "\n************************************* 3. 조정 종료 ****************************************\n";
 			std::cout << "조정 종료 : ①	최대반복계산수 (비정상종료)\n";
+			UpdateCoefficients(initial_coefficients, x_matrix, control_points, v_matrix);
+
 			break;
 		}
 
+		// So가 연속적으로 증가 (비정상종료)
 		else if (iteration >= 2 && (sqrt(So_square.at<double>(0, 0)) - So_list.at<double>(iteration - 1, 0)) > 0) {
 			if (So_list.at<double>(iteration - 1, 0) - So_list.at<double>(iteration - 2, 0) > 0)
 			{
@@ -148,9 +157,10 @@ int main(int argc, char* argv[])
 				outfile << "조정 종료 : ④	So가 연속적으로 증가 (비정상종료)\n";
 				std::cout << "\n************************************* 3. 조정 종료 ****************************************\n";
 				std::cout << "조정 종료 : ④	So가 연속적으로 증가 (비정상종료)\n";
+				UpdateCoefficients(initial_coefficients, x_matrix, control_points, v_matrix);
+
 				break;
 			}
-			continue;
 		}
 
 		// 2.3 계수 업데이트

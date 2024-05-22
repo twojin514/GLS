@@ -327,7 +327,7 @@ void PrintInformation(std::ofstream& outfile, std::string& title, std::string& b
 void PrintIteration(std::ofstream& outfile, int32_t iteration, std::vector<Point>& control_data, std::vector<double>& coefficients, cv::Mat& x_matrix, cv::Mat& v_matrix, cv::Mat& So_square)
 {
     outfile << std::fixed << std::setprecision(5);
-    std::cout << std::fixed << std::setprecision(5); // 소수점 4자리까지 출력
+    std::cout << std::fixed << std::setprecision(5); // 소수점 5자리까지 출력
 
      std::vector<char> parameter = { 'a', 'b', 'c', 'd' };
     outfile << "\n************************************* Iteration : " << iteration + 1<<" **************************************\n";
@@ -417,7 +417,7 @@ void PrintIteration(std::ofstream& outfile, int32_t iteration, std::vector<Point
 void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<double>& coefficients, std::vector<Point>& control_data, cv::Mat& x_matrix, cv::Mat& v_matrix, cv::Mat& sigma_xx_matrix, cv::Mat& sigma_ll_matrix, std::vector<Point>& measure_data)
 {
 	outfile << std::fixed << std::setprecision(5);
-	std::cout << std::fixed << std::setprecision(5); // 소수점 4자리까지 출력
+	std::cout << std::fixed << std::setprecision(5); // 소수점 5자리까지 출력
 
 
 
@@ -443,6 +443,7 @@ void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<dou
         << std::setw(21) << "Y" << "\t|"
         << std::setw(21) << "S_X" << "\t|"
         << std::setw(21) << "S_Y" << "\n\n";
+
     for (int i = 0; i < control_data.size(); ++i)
     {
         outfile << std::setw(5) << control_data[i].id << "\t"
@@ -467,16 +468,13 @@ void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<dou
         measure_data[i].new_SY = sqrt(pow(measure_data[i].old_Sx * coefficients[1], 2) + pow(measure_data[i].old_Sy * coefficients[0], 2));
     }
 
-    outfile << "\n3.4 측점의 변환 좌표 및 정밀도\n";
+    outfile << "\n3.4 측점의 변환 좌표\n";
     outfile << std::setw(5) << "Point_ID" << "\t|"
 		<< std::setw(21) << "x" << "\t|"
 		<< std::setw(21) << "y" << "\t|"
-		<< std::setw(21) << "S_x" << "\t|"
-		<< std::setw(21) << "S_y" << "\t|"
 		<< std::setw(21) << "X" << "\t|"
-		<< std::setw(21) << "Y" << "\t|"
-		<< std::setw(21) << "S_X" << "\t|"
-		<< std::setw(21) << "S_Y" << "\n\n";
+		<< std::setw(21) << "Y" << "\n\n";
+
 
     for (int i = 0; i < measure_data.size(); ++i) {
 		outfile << std::setw(5) << measure_data[i].id << "\t"
@@ -501,8 +499,12 @@ void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<dou
     std::cout << std::setw(5) << "Point_ID" << "\t|"
         << std::setw(21) << "x" << "\t|"
         << std::setw(21) << "y" << "\t|"
+        << std::setw(21) << "S_x" << "\t|"
+        << std::setw(21) << "S_y" << "\t|"
         << std::setw(21) << "X" << "\t|"
-        << std::setw(21) << "Y" << "\n\n";
+        << std::setw(21) << "Y" << "\t|"
+        << std::setw(21) << "S_X" << "\t|"
+        << std::setw(21) << "S_Y" << "\n\n";
 
     for (int i = 0; i < control_data.size(); ++i)
     {
@@ -521,7 +523,7 @@ void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<dou
     std::cout << std::setw(3) << "X = (" << coefficients[0] << ") x" << " - (" << coefficients[1] << ") y" << " + (" << coefficients[2] << ")\n";
     std::cout << std::setw(3) << "Y = (" << coefficients[1] << ") x" << " + (" << coefficients[0] << ") y" << " + (" << coefficients[3] << ")\n";
 
-    std::cout << "\n3.4 측점의 변환 좌표 및 정밀도\n";
+    std::cout << "\n3.4 측점의 변환 좌표\n";
     std::cout<< std::setw(5) << "Point_ID" << "\t|"
         << std::setw(21) << "x" << "\t|"
 		<< std::setw(21) << "y" << "\t|"
@@ -712,10 +714,4 @@ void UpdateCoefficients(std::vector<double>& initial_coefficients, cv::Mat& x_ma
     {
         initial_coefficients[i] += x_matrix.at<double>(i, 0);
     }
-
- //   for (int i = 0; i < control_data.size(); ++i)
- //   {
-	//	control_data[i].old_x += v_matrix.at<double>(2 * i, 0);
-	//	control_data[i].old_y += v_matrix.at<double>(2 * i + 1, 0);
-	//}
 }
