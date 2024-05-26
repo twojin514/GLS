@@ -102,36 +102,6 @@ void ReadPointFile(std::string FileName, std::vector<Point>& points_data)
 
 }
 
-// 입력된 데이터를 정렬하고 측점의 수를 계산하는 함수
-void SortInputData(std::vector<Point>& point_data, std::int32_t& point_num, std::vector<std::string>& point_names)
-{
-	//std::vector<std::string> point_names_temp;
-
-	//// Collect point names from lines_data and benchmarks_data
-	//for (const auto& point : point_data) {
-	//	point_names_temp.push_back(point.id);
-	//}
-
- //   std::sort(point_names_temp.begin(), point_names_temp.end()); // 공백, 기호, 문자, 숫자, 영어, 한글 순으로 정렬
- //   point_names_temp.erase(std::unique(point_names_temp.begin(), point_names_temp.end()), point_names_temp.end()); // 중복 제거
-
-	//point_names = point_names_temp;
- //   point_num = point_names_temp.size();
-
-    //point_data의 id를 기준으로 point_data를 정렬한다
-    std::sort(point_data.begin(), point_data.end(), [](const Point& a, const Point& b) {
-		return a.id < b.id;
-	});
-    point_num = point_data.size();
-    for (int i = 0; i < point_num; ++i)
-    {
-		point_names.push_back(point_data[i].id);
-	}
-
-    //
-
-}
-
 void SetControlData(std::vector<Point>& point_data, std::vector<Point>& control_point_data)
 {
     std::vector<Point> control_points;
@@ -324,7 +294,7 @@ void PrintInformation(std::ofstream& outfile, std::string& title, std::string& b
     }
 }
 
-void PrintIteration(std::ofstream& outfile, int32_t iteration, std::vector<Point>& control_data, std::vector<double>& coefficients, cv::Mat& x_matrix, cv::Mat& v_matrix, cv::Mat& So_square)
+void PrintIteration(std::ofstream& outfile, int32_t iteration, std::vector<Point>& control_data, std::vector<double>& coefficients, cv::Mat& x_matrix, cv::Mat& v_matrix, cv::Mat& ve_matrix, cv::Mat& So_square)
 {
     outfile << std::fixed << std::setprecision(5);
     std::cout << std::fixed << std::setprecision(5); // 소수점 5자리까지 출력
@@ -360,12 +330,12 @@ void PrintIteration(std::ofstream& outfile, int32_t iteration, std::vector<Point
         	outfile << std::setw(5) << control_data[i].id << "\t"
 			<< std::setw(21) << control_data[i].old_x << "\t"
 			<< std::setw(21) << control_data[i].old_y << "\t"
-			<< std::setw(21) << v_matrix.at<double>(2 * i, 0) << "\t"
-			<< std::setw(21) << v_matrix.at<double>(2 * i + 1, 0) << "\t"
-			<< std::setw(21) << control_data[i].new_X << "\t"
-            << std::setw(21) << control_data[i].new_Y << "\t"
-            << std::setw(21) << v_matrix.at<double>(2 * i + 2, 0) << "\t"
-			<< std::setw(21) << v_matrix.at<double>(2 * i + 3, 0) << "\n\n";
+			<< std::setw(21) << v_matrix.at<double>(4 * i, 0) << "\t"
+			<< std::setw(21) << v_matrix.at<double>(4 * i + 1, 0) << "\t"
+			<< std::setw(21) << control_data[i].old_x * coefficients[0] - control_data[i].old_y * coefficients[1] + coefficients[2] << "\t"
+            << std::setw(21) << control_data[i].old_y * coefficients[1] + control_data[i].old_y * coefficients[0] + coefficients[3] << "\t"
+            << std::setw(21) << v_matrix.at<double>(4 * i + 2, 0) << "\t"
+			<< std::setw(21) << v_matrix.at<double>(4 * i + 3, 0) << "\n\n";
     }
 
     outfile << "So : " << sqrt(So_square.at<double>(0, 0)) << "\n\n";
@@ -388,7 +358,7 @@ void PrintIteration(std::ofstream& outfile, int32_t iteration, std::vector<Point
     }
 
     std::cout << "2.2 반복계산 기준점 좌표 잔차와 So\n\n";
-    std::cout<< std::setw(5) << "Point_ID" << "\t|"
+    std::cout << std::setw(5) << "Point_ID" << "\t|"
         << std::setw(21) << "x" << "\t|"
         << std::setw(21) << "y" << "\t|"
         << std::setw(21) << "V_x" << "\t|"
@@ -399,22 +369,22 @@ void PrintIteration(std::ofstream& outfile, int32_t iteration, std::vector<Point
         << std::setw(21) << "V_Y" << "\n\n";
 
     for (int i = 0; i < control_data.size(); ++i) {
-		std::cout << std::setw(5) << control_data[i].id << "\t"
+        std::cout << std::setw(5) << control_data[i].id << "\t"
             << std::setw(21) << control_data[i].old_x << "\t"
             << std::setw(21) << control_data[i].old_y << "\t"
-            << std::setw(21) << v_matrix.at<double>(2 * i, 0) << "\t"
-            << std::setw(21) << v_matrix.at<double>(2 * i + 1, 0) << "\t"
-            << std::setw(21) << control_data[i].new_X << "\t"
-            << std::setw(21) << control_data[i].new_Y << "\t"
-            << std::setw(21) << v_matrix.at<double>(2 * i + 2, 0) << "\t"
-            << std::setw(21) << v_matrix.at<double>(2 * i + 3, 0) << "\n\n";
-	}
+            << std::setw(21) << v_matrix.at<double>(4 * i, 0) << "\t"
+            << std::setw(21) << v_matrix.at<double>(4 * i + 1, 0) << "\t"
+            << std::setw(21) << control_data[i].old_x * coefficients[0] - control_data[i].old_y * coefficients[1] + coefficients[2] << "\t"
+            << std::setw(21) << control_data[i].old_y * coefficients[1] + control_data[i].old_y * coefficients[0] + coefficients[3] << "\t"
+            << std::setw(21) << v_matrix.at<double>(4 * i + 2, 0) << "\t"
+            << std::setw(21) << v_matrix.at<double>(4 * i + 3, 0) << "\n\n";
+    }
 
     std::cout << "So : " << sqrt(So_square.at<double>(0, 0)) << "\n\n";
 
 }
 
-void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<double>& coefficients, std::vector<Point>& control_data, cv::Mat& x_matrix, cv::Mat& v_matrix, cv::Mat& sigma_xx_matrix, cv::Mat& sigma_ll_matrix, std::vector<Point>& measure_data)
+void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<double>& coefficients, std::vector<Point>& control_data, cv::Mat& x_matrix, cv::Mat& v_matrix, cv::Mat& sigma_xx_matrix, cv::Mat& sigma_ll_matrix, std::vector<Point>& measure_data, cv::Mat& So_square)
 {
 	outfile << std::fixed << std::setprecision(5);
 	std::cout << std::fixed << std::setprecision(5); // 소수점 5자리까지 출력
@@ -456,6 +426,8 @@ void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<dou
             << std::setw(21) << sqrt(sigma_ll_matrix.at<double>(2 * i, 2 * i)) << "\t"
             << std::setw(21) << sqrt(sigma_ll_matrix.at<double>(2 * i + 1, 2 * i + 1)) << "\n\n";
     }
+    outfile << " So : " << sqrt(So_square.at<double>(0, 0)) << "\n\n";
+
     outfile << "3.3 변환모델\n\n";
     outfile << std::setw(3) << "X = (" << coefficients[0] << ") x" << " - (" << coefficients[1] << ") y" << " + (" << coefficients[2] << ")\n";
     outfile << std::setw(3) << "Y = (" << coefficients[1] << ") x" << " + (" << coefficients[0] << ") y" << " + (" << coefficients[3] << ")\n";
@@ -519,6 +491,9 @@ void PrintFinal(std::ofstream& outfile, std::int32_t iteration , std::vector<dou
 			<< std::setw(21) << sqrt(sigma_ll_matrix.at<double>(2 * i + 1, 2 * i + 1)) << "\n\n";
 	
     }
+
+    std::cout<<" So : "<< sqrt(So_square.at<double>(0, 0)) << "\n\n";
+
     std::cout << "3.3 변환모델\n\n";
     std::cout << std::setw(3) << "X = (" << coefficients[0] << ") x" << " - (" << coefficients[1] << ") y" << " + (" << coefficients[2] << ")\n";
     std::cout << std::setw(3) << "Y = (" << coefficients[1] << ") x" << " + (" << coefficients[0] << ") y" << " + (" << coefficients[3] << ")\n";

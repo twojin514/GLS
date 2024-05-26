@@ -3,4 +3,4 @@ Business_Information	고급조정계산론
 Transformation_Model	2차원상사좌표변환
 Name	H.J.Kim
 Input_Data	C:\GLS\Input\Input_Data_1.csv
-Output_Data C:\GLS\Output\OutputData_1.txt
+Output_Data C:\GLS\Output\Output1Data_1.txt

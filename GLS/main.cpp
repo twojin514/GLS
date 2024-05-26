@@ -16,28 +16,27 @@ int main(int argc, char* argv[])
 	**********************************************************************/
 	ReadInformationFile(input_information, title, business_information, transformation_model, name, input_data, output_data); // 입력 자료 읽기
 
-	std::vector<Point> points;
-	ReadPointFile(input_data, points);
+	std::vector<Point> points; // 입력 자료
+	ReadPointFile(input_data, points); // 입력 자료 읽기
 
-	std::vector<Point> control_points;
-	std::vector<Point> measured_points;
+	std::vector<Point> control_points; // 기준점
+	std::vector<Point> measured_points; // 측점
 
 	std::ofstream outfile(output_data);  // 출력 자료 생성
 
-	outfile << std::fixed << std::setprecision(5);
-	std::cout << std::fixed << std::setprecision(5);
+	outfile << std::fixed << std::setprecision(5); // 출력 자료 소수점 5자리까지 출력
+	std::cout << std::fixed << std::setprecision(5); // 출력 자료 소수점 5자리까지 출력
 
 	/*********************************************************************
 	1.1 측점 분류
 	*********************************************************************/
-	// 우선 기준점로만 최소제곱 수행
-	SetControlData(points, control_points);
-	SetMeasuredData(points, measured_points);
+	SetControlData(points, control_points); // 기준점 분류
+	SetMeasuredData(points, measured_points); // 측점 분류
 
 	/*********************************************************************
 	1.2 입력자료 확인
 	*********************************************************************/
-	PrintInformation(outfile, title, business_information, transformation_model, name, points, control_points, measured_points);
+	PrintInformation(outfile, title, business_information, transformation_model, name, points, control_points, measured_points); // 입력 자료 출력
 
 	/*********************************************************************
 	1.3  초기 변환계수 설정
@@ -57,7 +56,7 @@ int main(int argc, char* argv[])
 		c0 = 0;
 		d0 = 0;
 
-		CalculateInitial(a0, b0, c0, d0, control_points);
+		CalculateInitial(a0, b0, c0, d0, control_points); // 초기 변환계수 설정
 	}
 	else {
 		double a0, b0, c0, d0;
@@ -73,7 +72,6 @@ int main(int argc, char* argv[])
 
 	// 초기 변환계수 저장
 	std::vector<double> initial_coefficients = { a0, b0, c0, d0 };
-	std::vector<double> update_coefficients = { a0, b0, c0, d0 };
 
 	outfile << "\n ************************************* 초기 변환계수 설정 **************************************\n";
 	outfile << " a0 : " << a0 << "\n" << " b0 : " << b0 << "\n" << " c0 : " << c0 << "\n" << " d0 : " << d0 << "\n";
@@ -101,10 +99,12 @@ int main(int argc, char* argv[])
 		SetVMatrix(ve_matrix, v_matrix, control_points, w_matrix , we_matrix, b_matrix, k_matrix, j_matrix, x_matrix, q_matrix); // 잔차행렬
 
 		// 분산 계산
-		CalculateSoSquare(So_square, control_points, ve_matrix, we_matrix); 		So_list.at<double>(iteration, 0) = sqrt(So_square.at<double>(0, 0)); // 단위무게 표준편차 
+		CalculateSoSquare(So_square, control_points, ve_matrix, we_matrix); // 단위무게 표준편차 		
+		So_list.at<double>(iteration, 0) = sqrt(So_square.at<double>(0, 0));  
+
 		CalculateSigmaXX(sigma_xx, So_square, j_matrix, we_matrix); // 최학값의 분산-공분산 행렬
 		CalculateSigmaLL(sigma_ll, sigma_xx, control_points, j_matrix); // 조정된 관측값의 분산-공분산 행렬
-		PrintIteration(outfile, iteration, control_points, initial_coefficients, x_matrix, v_matrix, So_square);
+		PrintIteration(outfile, iteration, control_points, initial_coefficients, x_matrix, v_matrix, ve_matrix , So_square); // 반복 계산 출력
 
 		// 반복 중단 조건
 		// 가장 큰 조정값이 어느 정도 미만으로 작아지면 종료 (정상종료)
@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 		}
 
 		// 단위무게 RMSE(So) 변화율 점검 (정상종료)
-		else if (iteration > 1 && ((sqrt(So_square.at<double>(0, 0)) - So_list.at<double>(iteration - 1, 0)) / So_list.at<double>(iteration - 1, 0)) <= 0.000001)
+		else if (iteration > 1 && ((sqrt(So_square.at<double>(0, 0)) - So_list.at<double>(iteration - 1, 0)) / So_list.at<double>(iteration - 1, 0)) <= 0.000001) 
 		{
 			outfile << "\n************************************* 3. 조정 종료 **************************************\n";
 			outfile << "조정 종료 : ③ 단위무게 RMSE(So) 변화율 점검 (정상종료)\n";
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
 
 	}
 
-	PrintFinal(outfile, iteration, initial_coefficients, control_points, x_matrix, v_matrix, sigma_xx, sigma_ll, measured_points);
+	PrintFinal(outfile, iteration, initial_coefficients, control_points, x_matrix, v_matrix, sigma_xx, sigma_ll, measured_points, So_square);
 
 
 	outfile.close();
